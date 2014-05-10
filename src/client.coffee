@@ -47,5 +47,4 @@ class Client
     else
       callback null, body, (resp?.headers or {})
 
-
 exports = module.exports = Client

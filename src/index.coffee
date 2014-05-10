@@ -17,7 +17,7 @@ class Etcd
   #   .set("key", "value", {prevValue: "oldvalue"}, callback)
   set: (key, value, options, callback) ->
     [options, callback] = @_argParser options, callback
-    opt = @_prepareOpts ("keys/" + @_stripSlashPrefix key), "/v2", value, options
+    opt = @_prepareOpts ("keys/" + @_stripSlashPrefix key), "/v2", @_valueToString(value), options
     @client.put opt, callback
 
   # Get value of key
@@ -35,7 +35,7 @@ class Etcd
   #   .create("path", "value", options, callback)
   create: (dir, value, options, callback) ->
     [options, callback] = @_argParser options, callback
-    opt = @_prepareOpts ("keys/" + @_stripSlashPrefix dir), "/v2", value, options
+    opt = @_prepareOpts ("keys/" + @_stripSlashPrefix dir), "/v2", @_valueToString(value), options
     @client.post opt, callback
 
   post: @::create
@@ -184,5 +184,19 @@ class Etcd
       [{}, options]
     else
       [options, callback]
+
+	# convert value to string before pushing to server (if object)
+  _valueToString: (value) ->
+    if typeof value == "object"
+      return JSON.stringify value
+    return value
+
+	# normalize back to object if valid json
+	_valueToObject: (value) ->
+		try
+			obj = JSON.parse value
+		catch
+			return value
+		return obj
 
 exports = module.exports = Etcd
