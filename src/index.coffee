@@ -25,9 +25,9 @@ class Etcd
   #   .get("key", callback)
   #   .get("key", {recursive: true}, callback)
   get: (key, options, callback) ->
-    [options, callback] = @_argParser options, callback
+    [options, @callback] = @_argParser options, callback
     opt = @_prepareOpts ("keys/" + @_stripSlashPrefix key), "/v2", null, options
-    @client.get opt, callback
+    @client.get opt, @_callback
 
   # Create a key (atomic in order)
   # Usage:
@@ -185,18 +185,24 @@ class Etcd
     else
       [options, callback]
 
-	# convert value to string before pushing to server (if object)
+  # convert value to string before pushing to server (if object)
   _valueToString: (value) ->
     if typeof value == "object"
       return JSON.stringify value
     return value
 
-	# normalize back to object if valid json
-	_valueToObject: (value) ->
-		try
-			obj = JSON.parse value
-		catch
-			return value
-		return obj
+  # normalize back to object if valid json
+  _valueToObject: (value) ->
+    try
+      obj = JSON.parse value
+    catch
+      return value
+    return obj
+
+  _callback: (err, res) =>
+    if res? and res.node? and res.node.value?
+      res.node.value = @_valueToObject res.node.value
+    @callback err, res
+
 
 exports = module.exports = Etcd
