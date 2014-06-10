@@ -200,9 +200,24 @@ class Etcd
     return obj
 
   _callback: (err, res) =>
-    if res? and res.node? and res.node.value?
+
+    if not res? or err? or not res.node?
+      return @callback err, res
+
+    # normalize the base node
+    if res.node.value?
       res.node.value = @_valueToObject res.node.value
-    @callback err, res
+  
+    # normalize all recursive nodes from the etcd response
+    if res.node.nodes?
+      for node in res.node.nodes when node.value?
+        ((node) =>
+          node.value = @_valueToObject node.value
+        )(node)
+
+    @callback null, res
+
+
 
 
 exports = module.exports = Etcd
