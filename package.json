@@ -22,7 +22,7 @@
   "engines": {
     "node": ">= 0.8.0"
   },
-  "main": "src/index.coffee",
+  "main": "lib/index",
   "scripts": {
     "build": "node_modules/coffee-script/bin/coffee --bare --compile --output lib/ src/*.coffee",
     "prepublish": "node_modules/coffee-script/bin/coffee --bare --compile --output lib/ src/*.coffee",
